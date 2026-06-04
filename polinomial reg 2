@@ -1,0 +1,49 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.pipeline import make_pipeline
+
+# 1. Ma'lumotlar to'plamini yaratish
+np.random.seed(42)
+X = np.random.rand(100, 1) * 10  # 0 dan 10 gacha bo'lgan tasodifiy ma'lumotlar
+# Polinomial munosabat: y = x^3 - 5*x^2 + 2*x + 2 + shovqin
+y = X**3 - 5*(X**2) + 2*X + 2 + np.random.normal(0, 5, X.shape)
+y = y.ravel()
+
+# 2. O'rgatish va testga bo'lish
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 3. Polinomial regressiya modelini pipeline orqali yaratish
+degree = 3  # Polinomial daraja (Kubik)
+model = make_pipeline(PolynomialFeatures(degree), LinearRegression())
+
+# 4. Modelni o'rgatish
+model.fit(X_train, y_train)
+
+# 5. Bashorat qilish
+y_pred = model.predict(X_test)
+
+# 6. Modelni baholash
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print(f'Mean Squared Error: {mse:.4f}')
+print(f'R^2 Score: {r2:.4f}')
+
+# 7. Natijalarni vizuallashtirish qismi
+# Grafik chiroyli chiqishi uchun X chizig'ini tartiblaymiz
+X_line = np.linspace(0, 10, 100).reshape(-1, 1)
+y_line = model.predict(X_line)
+
+plt.scatter(X_test, y_test, color='red', label='Asl ma\'lumotlar')
+plt.scatter(X_test, y_pred, color='blue', label='Bashorat qilingan')
+plt.plot(X_line, y_line, color='green', label='Polinomial chiziq') # Egri chiziq modeli
+plt.title('Polinomial Regressiya')
+plt.xlabel('X')
+plt.ylabel('y')
+plt.legend()
+plt.show()
